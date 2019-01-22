@@ -245,38 +245,56 @@ def remove_portions(image, remove_area, num_portions):
     """
 
     draw = ImageDraw.Draw(image)
-
-    ###############################
-    # This portion is for corners #
-    ###############################
-
-    # Randomly selects a corner to start from
     width, height = image.size
-    x1 = random.randint(0,1) * width
-    y1 = random.randint(0,1) * height
 
-    # Selects another corner on the same y-axis
-    x2 = x1
-    y2 = abs(y1 - random.randint(0, int(1 + height/4)))
+    for x in range(0, num_portions):
 
-    # Creates third point using given area
-    x3 = abs(x1 - (2 * remove_area / abs(y2 - y1 + 1))) # 2*area/height = base (triangle) (+ 1 so don't divide by 0)
-    y3 = y1
+    	which_remove = random.randint(0,1)
 
-    draw.polygon([(x1,y1), (x2, y2), (x3, y3)], fill = 'white')
+    	if which_remove == 0:
+    		###############################
+    		# This portion is for corners #
+    		###############################
 
+    		# Randomly selects a corner to start from
+    		x1 = random.randint(0,1) * width
+    		y1 = random.randint(0,1) * height
 
-    ###############################################
-    # This portion is for random missing portions #
-    ###############################################
+    		# Selects another corner on the same y-axis
+    		x2 = x1
+    		y2 = abs(y1 - random.randint(0, int(1 + height/4)))
 
-    x = random.randrange(int(width) - 50)
-    y = random.randrange(int(height) - 50)
-    points = [(x + random.randrange(100), y + random.randrange(100)) for point in range(random.randint(3, 6))]
+    		# Creates third point using given area
+    		x3 = abs(x1 - (2 * remove_area / abs(y2 - y1 + 1))) # 2*area/height = base (triangle) (+ 1 so don't divide by 0)
+    		y3 = y1
 
-    draw.polygon(points, fill='white', outline='white')
+    		draw.polygon([(x1,y1), (x2, y2), (x3, y3)], fill = 'white')
 
+    	else:
+    		###############################################
+    		# This portion is for random missing portions #
+    		###############################################
+
+    		x = random.randrange(int(width) - 50)
+    		y = random.randrange(int(height) - 50)
+    		points = [(x + random.randrange(100), y + random.randrange(100)) for point in range(random.randint(3, 6))]
+
+    		draw.polygon(points, fill='white', outline='white')
+   
     return image
+
+def stain_image(image, num_stains, color):
+	"""
+    Adds a liquid stain to the image
+
+    :param image:           The original image to be damaged
+    :param num_stains:      The number of stains to simulate
+    :param color:           The color of the stain
+    :return:                The image with multiple stains on it
+    """
+
+    # Need to find a good math form for simulating splash
+
 
 def preprocess_directory(data_path, label_path, damage_fn):
     """
@@ -318,5 +336,5 @@ im.show()
 #im = blotch_image(im, 100, True)
 #im = blotch_image(im, 100, True)
 #im = crease_image(im, 30, True)
-im = remove_portions(im, 7000, 3)
+im = remove_portions(im, 5000, 5)
 im.show()
