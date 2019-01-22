@@ -10,7 +10,7 @@ import math
 
 def get_image(image_path):
     """
-    Returns the image at the given image_paht
+    Returns the image at the given image_path
 
     :param image_path:  A path to an image
     :return:            An image
@@ -234,6 +234,49 @@ def blotch_image(image, blotch_size, use_fade):
     return_image.putdata(orig_data)
     return return_image
 
+def remove_portions(image, remove_area, num_portions):
+    """
+    Removes large portions from the image (usually focused at corners and margins of pictures)
+
+    :param image:           The original image to be damaged
+    :param blotch_size:     The desired area of a removed area
+    :param num_portions:    How many portions to remove
+    :return:                The image with an removed portions
+    """
+
+    draw = ImageDraw.Draw(image)
+
+    ###############################
+    # This portion is for corners #
+    ###############################
+
+    # Randomly selects a corner to start from
+    width, height = image.size
+    x1 = random.randint(0,1) * width
+    y1 = random.randint(0,1) * height
+
+    # Selects another corner on the same y-axis
+    x2 = x1
+    y2 = abs(y1 - random.randint(0, int(1 + height/4)))
+
+    # Creates third point using given area
+    x3 = abs(x1 - (2 * remove_area / abs(y2 - y1 + 1))) # 2*area/height = base (triangle) (+ 1 so don't divide by 0)
+    y3 = y1
+
+    draw.polygon([(x1,y1), (x2, y2), (x3, y3)], fill = 'white')
+
+
+    ###############################################
+    # This portion is for random missing portions #
+    ###############################################
+
+    x = random.randrange(int(width) - 50)
+    y = random.randrange(int(height) - 50)
+    points = [(x + random.randrange(100), y + random.randrange(100)) for point in range(random.randint(3, 6))]
+
+    draw.polygon(points, fill='white', outline='white')
+
+    return image
 
 def preprocess_directory(data_path, label_path, damage_fn):
     """
@@ -255,7 +298,6 @@ def preprocess_directory(data_path, label_path, damage_fn):
         label = damage_fn(current_image)
         label.save(cur_label_path, "JPEG")
 
-
 def sample_damaging(image):
     """
     Sample damaging that does one blotch and one crease on every Image
@@ -267,13 +309,14 @@ def sample_damaging(image):
 
 
 # Sample Pre-processing
-preprocess_directory("../dataset/toy-set", "../dataset/toy-set-labels",sample_damaging)
+# preprocess_directory("./pics", "../dataset/toy-set-labels",sample_damaging)
 
 # Test Code for damaging an image
-im = get_image("../dataset/toy-set/soldiers.jpg")
+im = get_image("../pics/bobby.jpg")
 im.show()
-im = blotch_image(im, 100, True)
-im = blotch_image(im, 100, True)
-im = blotch_image(im, 100, True)
-im = crease_image(im, 30, True)
+#im = blotch_image(im, 100, True)
+#im = blotch_image(im, 100, True)
+#im = blotch_image(im, 100, True)
+#im = crease_image(im, 30, True)
+im = remove_portions(im, 7000, 3)
 im.show()
